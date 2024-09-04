@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <packaging>jar</packaging>
+
+    <parent>
+        <groupId>net.hwyz.iov.cloud.tsp</groupId>
+        <artifactId>service-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>vehicle-access-gateway</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <description>车辆接入网关</description>
+    <name>vehicle-access-gateway</name>
+
+    <properties>
+        <spring-mqtt.version>5.3.2.RELEASE</spring-mqtt.version>
+    </properties>
+
+    <dependencies>
+        <!-- 框架: Kafka -->
+        <dependency>
+            <groupId>net.hwyz.iov.cloud.tsp</groupId>
+            <artifactId>framework-kafka-starter</artifactId>
+            <version>${framework-kafka.version}</version>
+        </dependency>
+        <!-- MQTT -->
+        <dependency>
+            <groupId>org.springframework.integration</groupId>
+            <artifactId>spring-integration-mqtt</artifactId>
+            <version>${spring-mqtt.version}</version>
+        </dependency>
+    </dependencies>
+
+</project>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="5">
+    <Properties>
+        <Property name="LOG_PATTERN" value="%date{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
+        <Property name="LOG_LEVEL" value="WARN"/>
+    </Properties>
+
+    <Appenders>
+        <!--控制台-->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+    </Appenders>
+
+
+    <Loggers>
+        <Logger name="net.hwyz.iov.cloud.tsp.vagw" level="DEBUG"/>
+        <Root level="${LOG_LEVEL}">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+
+</Configuration>
