@@ -53,7 +53,7 @@ public class TboxCmdConsumer {
                         if (StrUtil.isNotBlank(vin)) {
                             logger.debug("收到车辆[{}]指令消息[{}]", vin, cmdJson);
                             JSONObject cmd = JSONUtil.parseObj(cmdJson);
-                            mqttProvider.publish(0, true, getTopic(vin, cmd.getStr("type")), cmdJson);
+                            mqttProvider.publish(true, getTopic(vin, cmd.getStr("type")), cmdJson);
                         } else {
                             logger.warn("收到缺失VIN的异常指令消息[{}]", cmdJson);
                         }

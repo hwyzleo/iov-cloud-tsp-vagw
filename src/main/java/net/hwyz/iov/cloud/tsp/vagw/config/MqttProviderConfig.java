@@ -75,6 +75,18 @@ public class MqttProviderConfig {
     /**
      * 发送MQTT消息
      *
+     * @param retained 是否保留
+     * @param topic    Topic
+     * @param message  消息
+     */
+    public void publish(boolean retained, String topic, String message) {
+        // 默认QOS质量1
+        publish(1, retained, topic, message);
+    }
+
+    /**
+     * 发送MQTT消息
+     *
      * @param qos      QOS级别
      * @param retained 是否保留
      * @param topic    Topic
