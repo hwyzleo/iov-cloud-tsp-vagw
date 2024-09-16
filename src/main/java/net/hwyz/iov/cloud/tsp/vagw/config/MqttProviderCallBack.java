@@ -5,6 +5,8 @@ import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import java.util.Map;
+
 /**
  * MQTT消息回调
  *
@@ -12,6 +14,15 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
  */
 @Slf4j
 public class MqttProviderCallBack implements MqttCallback {
+
+    private TboxEventProducer producer;
+
+    public MqttProviderCallBack() {
+    }
+
+    public MqttProviderCallBack(TboxEventProducer producer) {
+        this.producer = producer;
+    }
 
     /**
      * 客户端断开连接的回调
@@ -38,5 +49,14 @@ public class MqttProviderCallBack implements MqttCallback {
     @Override
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
         logger.debug("消息发布成功");
+        if (producer != null) {
+            Map<String, Object> cmdMap = TboxCmdConsumer.cmdMapping.get(iMqttDeliveryToken.getMessageId());
+            if (cmdMap != null) {
+                cmdMap.put("type", "CMD_ACK");
+                cmdMap.put("ackTime", System.currentTimeMillis());
+                producer.send(String.valueOf(cmdMap.get("vin")), cmdMap);
+            }
+
+        }
     }
 }

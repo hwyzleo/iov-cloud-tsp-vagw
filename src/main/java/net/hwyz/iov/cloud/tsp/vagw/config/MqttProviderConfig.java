@@ -1,6 +1,7 @@
 package net.hwyz.iov.cloud.tsp.vagw.config;
 
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Slf4j
 @Configuration
+@RequiredArgsConstructor
 public class MqttProviderConfig {
 
     @Value("${spring.mqtt.username}")
@@ -33,6 +35,8 @@ public class MqttProviderConfig {
      */
     private MqttClient client;
 
+    private final TboxEventProducer tboxEventProducer;
+
     /**
      * 在bean初始化后连接到服务器
      */
@@ -47,16 +51,12 @@ public class MqttProviderConfig {
     public void connect() {
         logger.info("开始连接MQTT服务器");
         try {
-            //创建MQTT客户端对象
             client = new MqttClient(hostUrl, clientId, new MemoryPersistence());
-            //连接设置
             MqttConnectOptions options = new MqttConnectOptions();
             //是否清空session，设置false表示服务器会保留客户端的连接记录（订阅主题，qos）,客户端重连之后能获取到服务器在客户端断开连接期间推送的消息
             //设置为true表示每次连接服务器都是以新的身份
             options.setCleanSession(true);
-            //设置连接用户名
             options.setUserName(username);
-            //设置连接密码
             options.setPassword(password.toCharArray());
             //设置超时时间，单位为秒
             options.setConnectionTimeout(100);
@@ -64,8 +64,7 @@ public class MqttProviderConfig {
             options.setKeepAliveInterval(20);
             //设置遗嘱消息的话题，若客户端和服务器之间的连接意外断开，服务器将发布客户端的遗嘱信息
             options.setWill("willTopic", (clientId + "与服务器断开连接").getBytes(), 0, false);
-            //设置回调
-            client.setCallback(new MqttProviderCallBack());
+            client.setCallback(new MqttProviderCallBack(tboxEventProducer));
             client.connect(options);
         } catch (MqttException e) {
             e.printStackTrace();
@@ -79,9 +78,9 @@ public class MqttProviderConfig {
      * @param topic    Topic
      * @param message  消息
      */
-    public void publish(boolean retained, String topic, String message) {
+    public Integer publish(boolean retained, String topic, String message) {
         // 默认QOS质量1
-        publish(1, retained, topic, message);
+        return publish(1, retained, topic, message);
     }
 
     /**
@@ -92,12 +91,11 @@ public class MqttProviderConfig {
      * @param topic    Topic
      * @param message  消息
      */
-    public void publish(int qos, boolean retained, String topic, String message) {
+    public Integer publish(int qos, boolean retained, String topic, String message) {
         MqttMessage mqttMessage = new MqttMessage();
         mqttMessage.setQos(qos);
         mqttMessage.setRetained(retained);
         mqttMessage.setPayload(message.getBytes());
-        //主题的目的地，用于发布/订阅信息
         MqttTopic mqttTopic = client.getTopic(topic);
         //提供一种机制来跟踪消息的传递进度
         //用于在以非阻塞方式（在后台运行）执行发布是跟踪消息的传递进度
@@ -107,8 +105,10 @@ public class MqttProviderConfig {
             //一旦此方法干净地返回，消息就已被客户端接受发布，当连接可用，将在后台完成消息传递。
             token = mqttTopic.publish(mqttMessage);
             token.waitForCompletion();
+            return token.getMessageId();
         } catch (MqttException e) {
             e.printStackTrace();
+            return null;
         }
     }
 

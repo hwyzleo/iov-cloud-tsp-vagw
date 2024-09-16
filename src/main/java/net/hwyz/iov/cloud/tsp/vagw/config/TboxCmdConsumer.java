@@ -15,6 +15,9 @@ import reactor.kafka.receiver.ReceiverOptions;
 
 import javax.annotation.PostConstruct;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * TBOX指令消息消费者
@@ -36,6 +39,13 @@ public class TboxCmdConsumer {
     private final String TOPIC_TBOX_VAGW_CMD = "tbox-vagw-cmd";
 
     /**
+     * 指令映射表
+     * key: MQTT消息ID
+     * value: 指令
+     */
+    protected static ConcurrentHashMap<Integer, Map<String, Object>> cmdMapping = new ConcurrentHashMap<>();
+
+    /**
      * 消费TBOX服务指令消息
      */
     @PostConstruct
@@ -53,7 +63,13 @@ public class TboxCmdConsumer {
                         if (StrUtil.isNotBlank(vin)) {
                             logger.debug("收到车辆[{}]指令消息[{}]", vin, cmdJson);
                             JSONObject cmd = JSONUtil.parseObj(cmdJson);
-                            mqttProvider.publish(true, getTopic(vin, cmd.getStr("type")), cmdJson);
+                            Integer msgId = mqttProvider.publish(true, getTopic(vin, cmd.getStr("type")), cmdJson);
+                            if (msgId != null) {
+                                Map<String, Object> map = new HashMap<>();
+                                map.put("vin", vin);
+                                map.put("cmdId", cmd.getStr("cmdId"));
+                                cmdMapping.put(msgId, map);
+                            }
                         } else {
                             logger.warn("收到缺失VIN的异常指令消息[{}]", cmdJson);
                         }
