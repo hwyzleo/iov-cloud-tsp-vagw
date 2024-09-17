@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class MqttProviderConfig {
+public class MqttConfig {
 
     @Value("${spring.mqtt.username}")
     private String username;
@@ -64,8 +64,11 @@ public class MqttProviderConfig {
             options.setKeepAliveInterval(20);
             //设置遗嘱消息的话题，若客户端和服务器之间的连接意外断开，服务器将发布客户端的遗嘱信息
             options.setWill("willTopic", (clientId + "与服务器断开连接").getBytes(), 0, false);
-            client.setCallback(new MqttProviderCallBack(tboxEventProducer));
+            client.setCallback(new MqttCallBack(tboxEventProducer));
             client.connect(options);
+            int[] qos = {1};
+            String[] topics = {"UP/+/FIND_VEHICLE"};
+            client.subscribe(topics, qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }

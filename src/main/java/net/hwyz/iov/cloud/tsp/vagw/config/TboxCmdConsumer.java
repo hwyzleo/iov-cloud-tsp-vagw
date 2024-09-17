@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TboxCmdConsumer {
 
     private final KafkaProperties properties;
-    private final MqttProviderConfig mqttProvider;
+    private final MqttConfig mqttProvider;
 
     @Value("${spring.kafka.consumer.reactive-concurrency:5}")
     private Integer concurrency;

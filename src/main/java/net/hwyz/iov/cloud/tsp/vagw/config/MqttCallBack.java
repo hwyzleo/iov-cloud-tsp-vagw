@@ -1,5 +1,8 @@
 package net.hwyz.iov.cloud.tsp.vagw.config;
 
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -13,14 +16,14 @@ import java.util.Map;
  * @author hwyz_leo
  */
 @Slf4j
-public class MqttProviderCallBack implements MqttCallback {
+public class MqttCallBack implements MqttCallback {
 
     private TboxEventProducer producer;
 
-    public MqttProviderCallBack() {
+    public MqttCallBack() {
     }
 
-    public MqttProviderCallBack(TboxEventProducer producer) {
+    public MqttCallBack(TboxEventProducer producer) {
         this.producer = producer;
     }
 
@@ -37,10 +40,20 @@ public class MqttProviderCallBack implements MqttCallback {
      */
     @Override
     public void messageArrived(String topic, MqttMessage message) throws Exception {
+        String eventStr = new String(message.getPayload());
         logger.debug("接收消息主题 : {}", topic);
         logger.debug("接收消息Qos : {}", message.getQos());
-        logger.debug("接收消息内容 : {}", new String(message.getPayload()));
+        logger.debug("接收消息内容 : {}", eventStr);
         logger.debug("接收消息retained : {}", message.isRetained());
+        if (producer != null) {
+            JSONObject jsonObject = JSONUtil.parseObj(eventStr);
+            String vin = jsonObject.getStr("vin");
+            if (StrUtil.isNotBlank(vin)) {
+                producer.send(vin, new String(message.getPayload()));
+            } else {
+                logger.warn("TBOX事件[{}]车辆为空，不进行处理", eventStr);
+            }
+        }
     }
 
     /**
