@@ -1,5 +1,6 @@
 package net.hwyz.iov.cloud.tsp.vagw.config;
 
+import cn.hutool.core.util.RandomUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,17 +50,19 @@ public class MqttConfig {
      * 客户端连接服务端
      */
     public void connect() {
-        logger.info("开始连接MQTT服务器");
+        String randomClientId = clientId + "-" + RandomUtil.randomString(5);
+        logger.info("客户端[{}]开始连接MQTT服务器[{}]", randomClientId, hostUrl);
         try {
-            client = new MqttClient(hostUrl, clientId, new MemoryPersistence());
+            client = new MqttClient(hostUrl, randomClientId, new MemoryPersistence());
             MqttConnectOptions options = new MqttConnectOptions();
-            //是否清空session，设置false表示服务器会保留客户端的连接记录（订阅主题，qos）,客户端重连之后能获取到服务器在客户端断开连接期间推送的消息
-            //设置为true表示每次连接服务器都是以新的身份
+            // 是否清空session，设置false表示服务器会保留客户端的连接记录（订阅主题，qos）
+            // 客户端重连之后能获取到服务器在客户端断开连接期间推送的消息
+            // 设置为true表示每次连接服务器都是以新的身份
             options.setCleanSession(true);
             options.setUserName(username);
             options.setPassword(password.toCharArray());
             //设置超时时间，单位为秒
-            options.setConnectionTimeout(100);
+            options.setConnectionTimeout(60);
             //设置心跳时间 单位为秒，表示服务器每隔 1.5*20秒的时间向客户端发送心跳判断客户端是否在线
             options.setKeepAliveInterval(20);
             //设置遗嘱消息的话题，若客户端和服务器之间的连接意外断开，服务器将发布客户端的遗嘱信息
@@ -67,10 +70,17 @@ public class MqttConfig {
             client.setCallback(new MqttCallBack(tboxEventProducer));
             client.connect(options);
             int[] qos = {1};
-            String[] topics = {"UP/+/FIND_VEHICLE"};
+            String[] topics = {"$queue/UP/+/FIND_VEHICLE"};
             client.subscribe(topics, qos);
         } catch (MqttException e) {
             e.printStackTrace();
+            if (client != null) {
+                try {
+                    client.close();
+                    client.disconnect();
+                } catch (MqttException ex) {
+                }
+            }
         }
     }
 
