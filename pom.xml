@@ -20,6 +20,19 @@
         <spring-mqtt.version>5.3.2.RELEASE</spring-mqtt.version>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>maven-snapshots</id>
+            <url>http://nexus-internal.rox-motor.com:8081/repository/maven-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <dependencies>
         <!-- 框架: Kafka -->
         <dependency>

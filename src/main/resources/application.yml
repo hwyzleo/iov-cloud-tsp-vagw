@@ -1,6 +1,2 @@
 server:
-  port: 10102
-
-spring:
-  profiles:
-    active: local
+  port: 8080

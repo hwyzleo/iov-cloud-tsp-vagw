@@ -7,10 +7,12 @@ spring:
         dashboard: localhost:9026
     nacos:
       discovery:
-        server-addr: 127.0.0.1:8848
+        server-addr: ${NACOS_URL}
         namespace: 32c13f29-1aa6-468a-bacb-81be7f437dc9
       config:
-        server-addr: 127.0.0.1:8848
+        server-addr: ${NACOS_URL}
         namespace: 32c13f29-1aa6-468a-bacb-81be7f437dc9
         name: vehicle-access-gateway
         file-extension: yaml
+        shared-configs:
+          - application.yaml
