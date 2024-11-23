@@ -52,7 +52,7 @@ public class TboxCmdConsumer {
     public void consume() {
         ReceiverOptions<byte[], byte[]> options = ReceiverOptions.create(properties.buildConsumerProperties());
         options = options.subscription(Collections.singleton(TOPIC_TBOX_VAGW_CMD));
-        logger.info("开始监听TBOX服务[{}]指令消息", options.consumerProperties().get("bootstrap-servers"));
+        logger.info("开始监听TBOX服务[{}]指令消息", options.consumerProperties().get("bootstrap.servers"));
         new ReactiveKafkaConsumerTemplate<>(options)
                 .receiveAutoAck()
                 .flatMap(record -> {
