@@ -16,3 +16,4 @@ spring:
         file-extension: yaml
         shared-configs:
           - application.yaml
+          - kafka.yaml
