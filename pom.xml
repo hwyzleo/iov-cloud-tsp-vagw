@@ -6,11 +6,12 @@
     <packaging>jar</packaging>
 
     <parent>
-        <groupId>net.hwyz.iov.cloud.tsp</groupId>
-        <artifactId>service-parent</artifactId>
+        <groupId>net.hwyz.iov.cloud.parent</groupId>
+        <artifactId>service</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
+    <groupId>net.hwyz.iov.cloud.tsp</groupId>
     <artifactId>vehicle-access-gateway</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <description>车辆接入网关</description>
@@ -19,6 +20,21 @@
     <properties>
         <spring-mqtt.version>5.3.2.RELEASE</spring-mqtt.version>
     </properties>
+
+    <dependencies>
+        <!-- 框架: Kafka -->
+        <dependency>
+            <groupId>net.hwyz.iov.cloud.framework</groupId>
+            <artifactId>framework-kafka-starter</artifactId>
+            <version>${framework-kafka.version}</version>
+        </dependency>
+        <!-- MQTT -->
+        <dependency>
+            <groupId>org.springframework.integration</groupId>
+            <artifactId>spring-integration-mqtt</artifactId>
+            <version>${spring-mqtt.version}</version>
+        </dependency>
+    </dependencies>
 
     <repositories>
         <repository>
@@ -33,19 +49,17 @@
         </repository>
     </repositories>
 
-    <dependencies>
-        <!-- 框架: Kafka -->
-        <dependency>
-            <groupId>net.hwyz.iov.cloud.tsp</groupId>
-            <artifactId>framework-kafka-starter</artifactId>
-            <version>${framework-kafka.version}</version>
-        </dependency>
-        <!-- MQTT -->
-        <dependency>
-            <groupId>org.springframework.integration</groupId>
-            <artifactId>spring-integration-mqtt</artifactId>
-            <version>${spring-mqtt.version}</version>
-        </dependency>
-    </dependencies>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>maven-snapshots</id>
+            <url>http://nexus-internal.rox-motor.com:8081/repository/maven-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 
 </project>
