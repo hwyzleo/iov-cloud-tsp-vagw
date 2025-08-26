@@ -69,7 +69,7 @@ public class MqttConfig {
             options.setWill("willTopic", (clientId + "与服务器断开连接").getBytes(), 0, false);
             client.setCallback(new MqttCallBack(tboxEventProducer));
             client.connect(options);
-            int[] qos = {1};
+            int[] qos = {1, 1};
             String[] topics = {
                     "$queue/UP/+/FIND_VEHICLE",
                     "$queue/UP/+/RSMS"
