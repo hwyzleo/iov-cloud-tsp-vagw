@@ -70,7 +70,10 @@ public class MqttConfig {
             client.setCallback(new MqttCallBack(tboxEventProducer));
             client.connect(options);
             int[] qos = {1};
-            String[] topics = {"$queue/UP/+/FIND_VEHICLE"};
+            String[] topics = {
+                    "$queue/UP/+/FIND_VEHICLE",
+                    "$queue/UP/+/RSMS"
+            };
             client.subscribe(topics, qos);
         } catch (MqttException e) {
             e.printStackTrace();
