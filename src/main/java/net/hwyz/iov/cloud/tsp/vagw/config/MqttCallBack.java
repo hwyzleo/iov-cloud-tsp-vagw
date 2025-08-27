@@ -45,7 +45,7 @@ public class MqttCallBack implements MqttCallback {
         logger.debug("接收消息主题[{}]消息大小[{}]QOS[{}]", topic, message.getPayload().length, message.getQos());
         // 国标消息单独处理
         if (topic.endsWith("RSMS")) {
-            String vin = topic.replaceAll("^.*/UP/(.*?)/RSMS$", "$1").toUpperCase();
+            String vin = topic.replaceAll("^.*UP/(.*?)/RSMS$", "$1").toUpperCase();
             rsmsProducer.send(vin, message.getPayload());
             return;
         }
