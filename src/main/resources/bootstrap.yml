@@ -12,8 +12,9 @@ spring:
       config:
         server-addr: ${NACOS_URL}
         namespace: 32c13f29-1aa6-468a-bacb-81be7f437dc9
-        name: vehicle-access-gateway
+        name: tsp-vagw
         file-extension: yaml
         shared-configs:
           - application.yaml
           - kafka.yaml
+          - mysql.yaml
