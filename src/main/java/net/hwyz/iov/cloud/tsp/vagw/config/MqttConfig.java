@@ -36,6 +36,7 @@ public class MqttConfig {
      */
     private MqttClient client;
 
+    private final RsmsProducer rsmsProducer;
     private final TboxEventProducer tboxEventProducer;
 
     /**
@@ -67,7 +68,7 @@ public class MqttConfig {
             options.setKeepAliveInterval(20);
             //设置遗嘱消息的话题，若客户端和服务器之间的连接意外断开，服务器将发布客户端的遗嘱信息
             options.setWill("willTopic", (clientId + "与服务器断开连接").getBytes(), 0, false);
-            client.setCallback(new MqttCallBack(tboxEventProducer));
+            client.setCallback(new MqttCallBack(rsmsProducer, tboxEventProducer));
             client.connect(options);
             int[] qos = {1, 1};
             String[] topics = {
@@ -76,7 +77,7 @@ public class MqttConfig {
             };
             client.subscribe(topics, qos);
         } catch (MqttException e) {
-            e.printStackTrace();
+            logger.error("客户端[{}]连接MQTT服务器[{}]异常", randomClientId, hostUrl, e);
             if (client != null) {
                 try {
                     client.close();

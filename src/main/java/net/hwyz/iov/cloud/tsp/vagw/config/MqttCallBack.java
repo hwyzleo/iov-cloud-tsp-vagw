@@ -18,13 +18,15 @@ import java.util.Map;
 @Slf4j
 public class MqttCallBack implements MqttCallback {
 
-    private TboxEventProducer producer;
+    private RsmsProducer rsmsProducer;
+    private TboxEventProducer tboxEventProducer;
 
     public MqttCallBack() {
     }
 
-    public MqttCallBack(TboxEventProducer producer) {
-        this.producer = producer;
+    public MqttCallBack(RsmsProducer rsmsProducer, TboxEventProducer tboxEventProducer) {
+        this.rsmsProducer = rsmsProducer;
+        this.tboxEventProducer = tboxEventProducer;
     }
 
     /**
@@ -40,16 +42,19 @@ public class MqttCallBack implements MqttCallback {
      */
     @Override
     public void messageArrived(String topic, MqttMessage message) throws Exception {
+        logger.debug("接收消息主题[{}]消息大小[{}]QOS[{}]", topic, message.getPayload().length, message.getQos());
+        // 国标消息单独处理
+        if (topic.endsWith("RSMS")) {
+            String vin = topic.replaceAll("^.*/UP/(.*?)/RSMS$", "$1").toUpperCase();
+            rsmsProducer.send(vin, message.getPayload());
+            return;
+        }
         String eventStr = new String(message.getPayload());
-        logger.debug("接收消息主题 : {}", topic);
-        logger.debug("接收消息Qos : {}", message.getQos());
-        logger.debug("接收消息内容 : {}", eventStr);
-        logger.debug("接收消息retained : {}", message.isRetained());
-        if (producer != null) {
+        if (tboxEventProducer != null) {
             JSONObject jsonObject = JSONUtil.parseObj(eventStr);
             String vin = jsonObject.getStr("vin");
             if (StrUtil.isNotBlank(vin)) {
-                producer.send(vin, new String(message.getPayload()));
+                tboxEventProducer.send(vin, new String(message.getPayload()));
             } else {
                 logger.warn("TBOX事件[{}]车辆为空，不进行处理", eventStr);
             }
@@ -62,14 +67,13 @@ public class MqttCallBack implements MqttCallback {
     @Override
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
         logger.debug("消息发布成功");
-        if (producer != null) {
+        if (tboxEventProducer != null) {
             Map<String, Object> cmdMap = TboxCmdConsumer.cmdMapping.get(iMqttDeliveryToken.getMessageId());
             if (cmdMap != null) {
                 cmdMap.put("type", "CMD_ACK");
                 cmdMap.put("ackTime", System.currentTimeMillis());
-                producer.send(String.valueOf(cmdMap.get("vin")), cmdMap);
+                tboxEventProducer.send(String.valueOf(cmdMap.get("vin")), cmdMap);
             }
-
         }
     }
 }
